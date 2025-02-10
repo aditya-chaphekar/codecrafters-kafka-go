@@ -20,9 +20,21 @@ func main() {
 	}
 	buff := make([]byte, 1024)
 	_, err = conn.Read(buff)
+	msgSizeStartOffset := 0
+	msgSizeEndOffset := 4
+	msgSize := buff[msgSizeStartOffset:msgSizeEndOffset]
+
+	correlationIdStartOffset := 8
+	correlationIdEndOffset := 12
+	correlationId := buff[correlationIdStartOffset:correlationIdEndOffset]
+
 	if err != nil {
-		fmt.Println("Error reading: ", err.Error())
+		fmt.Println("Error reading from connection: ", err.Error())
 		os.Exit(1)
 	}
-	conn.Write([]byte{0, 0, 0, 0, 0, 0, 0, 7})
+	resp := make([]byte, 8)
+	copy(resp, msgSize)
+	copy(resp[4:], correlationId)
+	conn.Write(resp)
+
 }
